@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eye Unlock Mark 1.5</title>
+<style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #111; color: white; }
+    button { padding: 12px 24px; font-size: 18px; margin-top: 20px; cursor: pointer; border: none; border-radius: 6px; background: #28a745; color: white; }
+    #status { margin-top: 20px; font-size: 18px; }
+</style>
+</head>
+<body>
+<h1>Eye Unlock</h1>
+<p>Look at each corner in sequence to unlock</p>
+<button onclick="startUnlock()">Start Unlock</button>
+<div id="status">Awaiting start...</div>
+
+<script src="https://webgazer.cs.brown.edu/webgazer.js"></script>
+<script>
+let corners = { tl: false, tr: false, br: false, bl: false };
+let screenW = window.innerWidth;
+let screenH = window.innerHeight;
+
+function startUnlock() {
+    document.getElementById('status').innerText = "Starting camera and eye tracking...";
+    webgazer.setGazeListener((data, elapsedTime) => {
+        if (!data) return;
+
+        let x = data.x, y = data.y;
+        let margin = 100; // corner size
+
+        if (x < margin && y < margin) corners.tl = true;
+        if (x > screenW - margin && y < margin) corners.tr = true;
+        if (x > screenW - margin && y > screenH - margin) corners.br = true;
+        if (x < margin && y > screenH - margin) corners.bl = true;
+
+        updateStatus();
+
+        if (corners.tl && corners.tr && corners.br && corners.bl) {
+            document.getElementById('status').innerText = "Unlocked! Redirecting...";
+            setTimeout(() => { window.location.href = "https://nangleps.com"; }, 1000);
+        }
+    }).begin();
+}
+
+function updateStatus() {
+    let statusText = `Corners found: TL=${corners.tl} TR=${corners.tr} BR=${corners.br} BL=${corners.bl}`;
+    document.getElementById('status').innerText = statusText;
+}
+</script>
+</body>
+</html>
